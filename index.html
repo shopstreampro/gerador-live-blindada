@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Live Blindada PRO — IA Generativa</title>
+  <style>
+    :root {
+      --bg: #060913;
+      --card: #0f172a;
+      --card-inner: #080d1a;
+      --border: #1e293b;
+      --cyan: #06b6d4;
+      --cyan-light: #38bdf8;
+      --purple: #8b5cf6;
+      --pink: #ec4899;
+      --green: #10b981;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --text: #ffffff;
+      --muted: #cbd5e1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 20px; min-height: 100vh; }
+    .container { max-width: 980px; margin: 0 auto; }
+
+    /* TELA DE LICENÇA */
+    #lockOverlay { max-width: 440px; margin: 60px auto; background: var(--card); border: 2px solid #334155; border-radius: 18px; padding: 32px; text-align: center; box-shadow: 0 0 35px rgba(6,182,212,0.18); }
+    .logo { font-size: 42px; margin-bottom: 10px; }
+    h1 { font-size: 26px; font-weight: 900; background: linear-gradient(90deg, #38bdf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .sub { font-size: 14px; color: var(--muted); margin: 8px 0 20px; }
+    input, select { width: 100%; background: var(--card-inner); border: 2px solid #334155; color: #fff; padding: 14px; border-radius: 10px; font-size: 15px; margin-bottom: 14px; outline: none; transition: 0.2s; }
+    input:focus, select:focus { border-color: var(--cyan); box-shadow: 0 0 12px rgba(6,182,212,0.25); }
+
+    /* BOTÃO PRINCIPAL */
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+      border: none;
+      color: #ffffff;
+      font-weight: 900;
+      padding: 16px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.35);
+      transition: 0.2s;
+    }
+    .btn-primary:hover { filter: brightness(1.12); transform: translateY(-1px); box-shadow: 0 6px 26px rgba(139, 92, 246, 0.45); }
+    .btn-primary:disabled { opacity: 0.65; cursor: wait; }
+
+    /* BOTÕES SECUNDÁRIOS */
+    .btn-neon-outline {
+      background: rgba(6, 182, 212, 0.70);
+      border: 2px solid var(--cyan);
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+    }
+    .btn-neon-outline:hover { background: rgba(6, 182, 212, 0.95); transform: translateY(-1px); }
+
+    .btn-danger-outline {
+      background: rgba(239, 68, 68, 0.70);
+      border: 2px solid var(--red);
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+    }
+    .btn-danger-outline:hover { background: rgba(239, 68, 68, 0.95); transform: translateY(-1px); }
+
+    /* CABEÇALHO & CARTÕES */
+    #mainApp { display: none; }
+    header { background: var(--card); border: 2px solid var(--border); border-radius: 16px; padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 12px; }
+    .header-title { font-size: 24px; font-weight: 900; background: linear-gradient(90deg, #38bdf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .header-sub { font-size: 14px; color: var(--muted); display: block; margin-top: 2px; }
+    .status-pill { background: rgba(16, 185, 129, 0.70); border: 2px solid var(--green); color: #ffffff; padding: 6px 14px; border-radius: 99px; font-size: 13px; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+
+    /* BARRA DE ATALHOS DO TOPO */
+    .quick-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 22px; }
+    .btn-shortcut {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px 18px;
+      border-radius: 12px;
+      font-size: 14.5px;
+      font-weight: 800;
+      text-decoration: none;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+      transition: 0.2s;
+      text-align: center;
+    }
+
+    .sc-cyan { background: rgba(6, 182, 212, 0.70); border: 2px solid var(--cyan); }
+    .sc-cyan:hover { background: rgba(6, 182, 212, 0.95); box-shadow: 0 4px 18px rgba(6, 182, 212, 0.4); transform: translateY(-1px); }
+
+    .sc-purple { background: rgba(139, 92, 246, 0.70); border: 2px solid var(--purple); }
+    .sc-purple:hover { background: rgba(139, 92, 246, 0.95); box-shadow: 0 4px 18px rgba(139, 92, 246, 0.4); transform: translateY(-1px); }
+
+    .sc-pink { background: rgba(236, 72, 153, 0.70); border: 2px solid var(--pink); }
+    .sc-pink:hover { background: rgba(236, 72, 153, 0.95); box-shadow: 0 4px 18px rgba(236, 72, 153, 0.4); transform: translateY(-1px); }
+
+    /* GUIA RÁPIDO 3 PASSOS */
+    .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .guide-step { background: var(--card-inner); border: 1.5px solid #2a364f; border-radius: 12px; padding: 14px; }
+    .guide-step strong { display: block; color: #38bdf8; font-size: 13.5px; margin-bottom: 5px; }
+    .guide-step p { font-size: 12.5px; color: #cbd5e1; line-height: 1.45; }
+
+    /* BLOCOS / CARTÕES */
+    .card { background: var(--card); border: 2px solid var(--border); border-radius: 18px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
+    .card-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-bottom: 14px; margin-bottom: 18px; border-bottom: 2px solid #1e293b; }
+    .card-header h2 { font-size: 20px; font-weight: 900; color: #ffffff; display: flex; align-items: center; gap: 10px; }
+
+    .step-badge { background: rgba(6, 182, 212, 0.70); border: 1.5px solid var(--cyan); color: #ffffff; font-size: 12px; font-weight: 900; padding: 4px 10px; border-radius: 8px; }
+    .step-badge.purple { background: rgba(139, 92, 246, 0.70); border-color: var(--purple); color: #ffffff; }
+    .step-badge.red { background: rgba(239, 68, 68, 0.70); border-color: var(--red); color: #ffffff; }
+
+    label { display: block; font-size: 14px; color: #e2e8f0; margin-bottom: 6px; font-weight: 700; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+
+    /* STATUS IA */
+    #aiStatusBadge { margin-top: 12px; font-size: 13.5px; font-weight: 700; padding: 10px 14px; border-radius: 10px; display: none; }
+    .ai-ok { background: rgba(16, 185, 129, 0.16); border: 1.5px solid var(--green); color: #a7f3d0; }
+    .ai-warn { background: rgba(245, 158, 11, 0.16); border: 1.5px solid var(--amber); color: #fde68a; }
+
+    /* VIABILIDADE */
+    .viability-box { border-radius: 14px; padding: 20px; border: 2px solid; }
+    .viability-high { background: rgba(16,185,129,0.14); border-color: var(--green); color: #d1fae5; }
+    .viability-med { background: rgba(245,158,11,0.14); border-color: var(--amber); color: #fef3c7; }
+    .viability-low { background: rgba(239,68,68,0.16); border-color: var(--red); color: #fee2e2; }
+    .score-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 900; font-size: 18px; }
+    .progress-bg { width: 100%; height: 14px; background: #050811; border-radius: 99px; overflow: hidden; margin-bottom: 12px; }
+    .progress-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+
+    /* ABAS DOS 3 ÁUDIOS */
+    .audio-tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .tab-btn { background: var(--card-inner); border: 2px solid #334155; color: #cbd5e1; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; text-align: center; transition: 0.2s; }
+    .tab-btn.active { background: rgba(6, 182, 212, 0.70); border-color: var(--cyan); color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+    .tab-btn.tab-purple.active { background: rgba(139, 92, 246, 0.70); border-color: var(--purple); color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+    .tab-btn.tab-red.active { background: rgba(239, 68, 68, 0.70); border-color: var(--red); color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .audio-warning { background: rgba(239,68,68,0.16); border: 1.5px solid var(--red); color: #fecaca; padding: 14px; border-radius: 12px; font-size: 14px; margin-bottom: 14px; line-height: 1.5; }
+    .audio-info { background: rgba(6, 182, 212, 0.12); border: 1.5px solid rgba(6, 182, 212, 0.45); color: #e0f2fe; padding: 12px 14px; border-radius: 10px; font-size: 13.5px; margin-bottom: 12px; }
+
+    .badge-rule { background: rgba(6, 182, 212, 0.12); border: 1.5px solid var(--cyan); color: #e0f2fe; padding: 14px; border-radius: 12px; font-size: 14px; margin-bottom: 16px; }
+    .take-item { background: var(--card-inner); border-left: 4px solid var(--cyan); padding: 12px 14px; border-radius: 10px; margin-bottom: 10px; font-size: 14px; }
+    .json-card { background: var(--card-inner); border: 1.5px solid #2a364f; border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+    .json-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px; color: #c084fc; font-weight: 800; }
+    .alert-danger { background: rgba(239,68,68,0.2); border: 1.5px solid var(--red); color: #fecaca; padding: 12px; border-radius: 10px; font-size: 14px; margin-bottom: 14px; display: none; font-weight: 700; }
+    pre { white-space: pre-wrap; font-family: 'Consolas', monospace; font-size: 13px; color: #f1f5f9; background: #050811; padding: 14px; border-radius: 10px; border: 1px solid #334155; line-height: 1.55; }
+    .script-pre { font-family: inherit; font-size: 14.5px; }
+
+    .tip-box { background: var(--card-inner); border: 1.5px solid #2a364f; border-top: 4px solid var(--purple); border-radius: 12px; padding: 16px; font-size: 14px; line-height: 1.6; }
+    .tip-box h3 { font-size: 16px; color: #c084fc; margin-bottom: 8px; font-weight: 800; }
+    .tip-box ul { padding-left: 20px; color: #e2e8f0; }
+    .tip-box li { margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- TELA DE LICENÇA -->
+    <div id="lockOverlay">
+      <div class="logo">🛡️</div>
+      <h1>Gerador de Live Blindada PRO</h1>
+      <p class="sub">Digite sua Chave VIP para liberar o painel completo com IA</p>
+      <input type="text" id="keyInput" placeholder="COLE SUA CHAVE AQUI" style="text-align:center;font-weight:900;text-transform:uppercase;font-size:16px;">
+      <button type="button" class="btn-primary" id="btnUnlock">🔓 Liberar Ferramenta Agora</button>
+      <p id="lockStatus" style="color:#fca5a5;font-size:13px;margin-top:14px;min-height:20px;font-weight:700;"></p>
+    </div>
+
+    <!-- APP PRINCIPAL -->
+    <div id="mainApp">
+      <header>
+        <div>
+          <span class="header-title">🛡️ Gerador de Live Blindada PRO</span>
+          <span class="header-sub">IA Generativa Universal • Prompts Flow JSON • Roteiros Humanizados</span>
+        </div>
+        <span id="clientBadge" class="status-pill">🟢 Licença Ativa</span>
+      </header>
+
+      <!-- 3 BOTÕES DE ATALHO NEON -->
+      <div class="quick-links">
+        <a href="https://labs.google/fx/pt/tools/flow" target="_blank" rel="noopener" class="btn-shortcut sc-cyan">
+          🎬 Abrir Google Flow (Vídeos)
+        </a>
+        <a href="https://fish.audio/" target="_blank" rel="noopener" class="btn-shortcut sc-purple">
+          🎙️ Abrir Fish Audio (Voz IA)
+        </a>
+        <a href="https://ggmax.com.br/anuncio/grok-flow-chat-gpt-meshy-dreamface-elevenlabs-lovable-muse-digen-voicemod-heygen" target="_blank" rel="noopener" class="btn-shortcut sc-pink">
+          🔥 Recarga 1.000 Flow (A partir de R$ 10)
+        </a>
+      </div>
+
+      <!-- CARTÃO 1: CONFIGURAÇÃO -->
+      <div class="card">
+        <div class="card-header">
+          <h2><span class="step-badge">PASSO 1</span> Configurar Produto &amp; Gerar com IA</h2>
+        </div>
+
+        <div class="guide-grid">
+          <div class="guide-step">
+            <strong>1️⃣ Digite Qualquer Produto</strong>
+            <p>A inteligência artificial identifica o produto, preenche os diferenciais e avalia a chance real de venda sem aparecer.</p>
+          </div>
+          <div class="guide-step">
+            <strong>2️⃣ Gere as Cenas no Google Flow</strong>
+            <p>Anexe a foto do produto direto no Google Flow e cole cada JSON sob medida (6 a 10 cenas diferentes) para evitar bloqueio por loop.</p>
+          </div>
+          <div class="guide-step">
+            <strong>3️⃣ Gere a Voz no Fish Audio</strong>
+            <p>Copie os roteiros exclusivos criados pela IA em 3 etapas, gere o áudio longo de 15 a 20 min e sincronize com as cenas na live.</p>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div>
+            <label>Nome do Produto:</label>
+            <input type="text" id="prodName" placeholder="Ex: Kit de 200 cílios ou Manta de Sofá">
+          </div>
+          <div>
+            <label>Estilo de Gravação na Câmera:</label>
+            <select id="prodFormat">
+              <option value="maos_mesa">🖐️ Mãos na Mesa / Close-up (Relógio, Make, Cílios, Manta)</option>
+              <option value="ligado_acao">🎛️ Ligado em Ação / Controle (Cortina LED, Ventilador, Robô)</option>
+              <option value="ambiente_espaco">🛋️ Ambiente / Uso no Espaço (Toalha Aberta, Tapete, Cama)</option>
+              <option value="vestir_corpo">👗 Vestir no Corpo (Vestidos, Blusas, Calças)</option>
+            </select>
+          </div>
+          <div>
+            <label>Duração da Live:</label>
+            <select id="liveDuration">
+              <option value="60">1 Hora (60 minutos)</option>
+              <option value="120">2 Horas (120 minutos)</option>
+              <option value="180">3 Horas (180 minutos)</option>
+            </select>
+          </div>
+        </div>
+
+        <label>Principal Benefício ou Diferencial (opcional — a IA completa sozinha):</label>
+        <input type="text" id="prodBenefit" placeholder="Deixe em branco para a IA preencher automaticamente ou digite aqui...">
+        <div class="alert-danger" id="bannedWarning"></div>
+        <button type="button" class="btn-primary" id="btnGenerate">✨ Avaliar Viabilidade &amp; Gerar Estrutura com IA</button>
+        <div id="aiStatusBadge"></div>
+      </div>
+
+      <div id="resultArea" style="display:none;">
+        <!-- CARTÃO 2: DIAGNÓSTICO -->
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="step-badge purple">PASSO 2</span> Diagnóstico de Viabilidade (Sem Aparecer)</h2>
+          </div>
+          <div id="viabilityBox" class="viability-box">
+            <div class="score-header">
+              <span id="viabilityTitle">Avaliando...</span>
+              <span id="viabilityPercent">0%</span>
+            </div>
+            <div class="progress-bg">
+              <div id="viabilityBar" class="progress-fill" style="width:0%;"></div>
+            </div>
+            <p id="viabilityAdvice" style="font-size:14.5px;line-height:1.6;"></p>
+          </div>
+        </div>
+
+        <!-- CARTÃO 3: MAPA ANTI-LOOP -->
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="step-badge">PASSO 3</span> Mapa Anti-Loop (Cenas Sob Medida)</h2>
+          </div>
+          <div class="badge-rule" id="antiLoopSummary"></div>
+          <div id="takesList"></div>
+        </div>
+
+        <!-- CARTÃO 4: PROMPTS FLOW JSON -->
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="step-badge purple">PASSO 4</span> Prompts JSON para o Google Flow (9:16)</h2>
+            <button type="button" class="btn-neon-outline" onclick="copyAllJson()">📋 Copiar Todos os JSONs</button>
+          </div>
+          <div id="jsonPromptsList"></div>
+        </div>
+
+        <!-- CARTÃO 5: ROTEIROS DE VOZ HUMANIZADOS -->
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="step-badge">PASSO 5</span> Roteiros Humanizados (3 Etapas de Áudio)</h2>
+          </div>
+
+          <div class="audio-tabs">
+            <button type="button" class="tab-btn active" onclick="switchAudioTab(1)">🎙️ Áudio 1: Abertura &amp; Água</button>
+            <button type="button" class="tab-btn tab-purple" onclick="switchAudioTab(2)">✨ Áudio 2: Detalhes &amp; Adjetivos</button>
+            <button type="button" class="tab-btn tab-red" onclick="switchAudioTab(3)">🎉 Áudio 3: Parabenizar Compras</button>
+          </div>
+
+          <div id="audioTab1" class="tab-panel active">
+            <div class="audio-info" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+              <span>💡 <strong>Primeiros 30 min:</strong> Boas-vindas, pausa para água e aviso para quem chegou agora.</span>
+              <button type="button" class="btn-neon-outline" onclick="copyText('scriptAudio1')">📋 Copiar Áudio 1</button>
+            </div>
+            <pre id="scriptAudio1" class="script-pre"></pre>
+          </div>
+
+          <div id="audioTab2" class="tab-panel">
+            <div class="audio-info" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+              <span>💡 <strong>Meio da live:</strong> Adjetivos do produto, qualidade real e cupom na sacolinha laranja.</span>
+              <button type="button" class="btn-neon-outline" onclick="copyText('scriptAudio2')">📋 Copiar Áudio 2</button>
+            </div>
+            <pre id="scriptAudio2" class="script-pre"></pre>
+          </div>
+
+          <div id="audioTab3" class="tab-panel">
+            <div class="audio-warning">
+              🚨 <strong>REGRA DE SEGURANÇA:</strong> Só ative o <strong>Áudio 3</strong> após 30-40 min de live <strong>SE realmente começaram a sair compras na tela!</strong> Se não saiu venda ainda, não use para não simular interação falsa.
+            </div>
+            <div class="audio-info" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+              <span>🎉 <strong>Falas de agradecimento</strong> para intercalar quando os pedidos estiverem saindo:</span>
+              <button type="button" class="btn-danger-outline" onclick="copyText('scriptAudio3')">📋 Copiar Áudio 3</button>
+            </div>
+            <pre id="scriptAudio3" class="script-pre"></pre>
+          </div>
+        </div>
+
+        <!-- CARTÃO 6: CHAT TURBO -->
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="step-badge purple">PASSO 6</span> 15 Frases Humanizadas para o Chat Turbo</h2>
+            <button type="button" class="btn-neon-outline" onclick="copyText('chatOutput')">📋 Copiar as 15 Frases</button>
+          </div>
+          <pre id="chatOutput" class="script-pre"></pre>
+        </div>
+
+        <!-- CARTÃO 7: GUIA DE BLINDAGEM -->
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="step-badge red">GUIA VIP</span> Blindagem Fish Audio &amp; Regras Antiban</h2>
+          </div>
+          <div class="grid-2">
+            <div class="tip-box">
+              <h3>⏱️ Tempo Certo do Áudio Longo</h3>
+              <ul>
+                <li><strong>Mínimo de 12 a 20 minutos:</strong> Nunca use áudio curto de 1 minuto em loop.</li>
+                <li><strong>Pausas naturais:</strong> Mantenha pausas de <code>[2s a 3s]</code> entre os blocos.</li>
+              </ul>
+            </div>
+            <div class="tip-box">
+              <h3>🎵 Música de Fundo (Anti-Robô)</h3>
+              <ul>
+                <li><strong>Volume em 8% a 12%:</strong> Use instrumental suave (Lo-Fi sem vocal) no fundo da voz IA.</li>
+                <li><strong>Velocidade 1.0x:</strong> Mantém o tom natural de demonstração ao vivo.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const LICENSE_API_URL = "https://script.google.com/macros/s/AKfycbyARIqcmk7Cb-Dpc_92uxq9aYBV80ff4M7KeTzdZvddPyj8VM7zjvY_uyjDm-BZ5B0M/exec";
+    const BANNED_TERMS = ['réplica', 'primeira linha', 'original', 'cura', 'emagrece', 'milagre', 'pix', 'whatsapp', 'instagram', 'bio', 'garantia vitalícia'];
+
+    function switchAudioTab(tabNum) {
+      document.querySelectorAll('.tab-btn').forEach((b, idx) => b.classList.toggle('active', idx === tabNum - 1));
+      document.querySelectorAll('.tab-panel').forEach((p, idx) => p.classList.toggle('active', idx === tabNum - 1));
+    }
+
+    function getDeviceId() {
+      let id = localStorage.getItem('ss_web_device_id');
+      if (!id) { id = 'WEB-' + Math.random().toString(36).substring(2, 8).toUpperCase(); localStorage.setItem('ss_web_device_id', id); }
+      return id;
+    }
+
+    async function checkKey(key) {
+      const status = document.getElementById('lockStatus');
+      const btn = document.getElementById('btnUnlock');
+      btn.disabled = true;
+      btn.textContent = '⏳ VERIFICANDO LICENÇA...';
+      try {
+        const url = `${LICENSE_API_URL}?key=${encodeURIComponent(key)}&deviceId=${encodeURIComponent(getDeviceId())}`;
+        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+        const data = await res.json();
+        if (data.valid) {
+          localStorage.setItem('ss_saved_key', key);
+          document.getElementById('lockOverlay').style.display = 'none';
+          document.getElementById('mainApp').style.display = 'block';
+          document.getElementById('clientBadge').textContent = `🟢 ${data.cliente} (Até ${data.validade})`;
+        } else { status.textContent = '🚫 ' + (data.message || 'Chave não encontrada.'); }
+      } catch (e) { status.textContent = '⚠️ Falha de rede: ' + e.message; }
+      finally { btn.disabled = false; btn.textContent = '🔓 Liberar Ferramenta Agora'; }
+    }
+
+    document.getElementById('btnUnlock').addEventListener('click', () => {
+      const k = document.getElementById('keyInput').value.trim().toUpperCase();
+      if (k) checkKey(k);
+    });
+    const saved = localStorage.getItem('ss_saved_key');
+    if (saved) { document.getElementById('keyInput').value = saved; checkKey(saved); }
+
+    let generatedJsonStrings = [];
+
+    document.getElementById('btnGenerate').addEventListener('click', async () => {
+      const prod = document.getElementById('prodName').value.trim();
+      if (!prod) { alert('Digite o nome do produto primeiro!'); return; }
+
+      const format = document.getElementById('prodFormat').value;
+      const mins = parseInt(document.getElementById('liveDuration').value);
+      const benefitInput = document.getElementById('prodBenefit').value.trim();
+      const numTakes = mins === 60 ? 6 : (mins === 120 ? 8 : 10);
+
+      const btn = document.getElementById('btnGenerate');
+      const aiBadge = document.getElementById('aiStatusBadge');
+      btn.disabled = true;
+      btn.textContent = '🤖 IA ANALISANDO PRODUTO & CRIANDO ROTEIROS...';
+      aiBadge.style.display = 'block';
+      aiBadge.className = 'ai-ok';
+      aiBadge.textContent = '⏳ Conectando com a IA para gerar cenas e áudios sob medida para "' + prod + '"...';
+
+      let aiData = null;
+      try {
+        const aiUrl = `${LICENSE_API_URL}?action=ai_live&prod=${encodeURIComponent(prod)}&format=${encodeURIComponent(format)}&benefit=${encodeURIComponent(benefitInput)}&takes=${numTakes}`;
+        const res = await fetch(aiUrl, { method: 'GET', redirect: 'follow' });
+        const parsed = await res.json();
+        if (parsed && !parsed.error && parsed.audio1 && parsed.cenas) {
+          aiData = parsed;
+        }
+      } catch (err) {
+        console.warn('Fallback local ativado:', err);
+      }
+
+      const benefit = benefitInput || (aiData && aiData.beneficio_sugerido) || 'acabamento impecável, super resistente e envio rápido';
+      if (!benefitInput && aiData && aiData.beneficio_sugerido) {
+        document.getElementById('prodBenefit').value = aiData.beneficio_sugerido;
+      }
+
+      if (aiData) {
+        aiBadge.className = 'ai-ok';
+        aiBadge.innerHTML = `✨ <strong>IA Conectada!</strong> Cenas JSON, 3 roteiros de áudio e 15 frases do chat criados sob medida para <strong>${prod}</strong>.`;
+      } else {
+        aiBadge.className = 'ai-warn';
+        aiBadge.innerHTML = `⚡ Modo rápido ativado para <strong>${prod}</strong>. (Atualize o Código.gs no Apps Script se quiser textos inéditos da IA).`;
+      }
+
+      // Diagnóstico de Viabilidade
+      const vBox = document.getElementById('viabilityBox');
+      const vTitle = document.getElementById('viabilityTitle');
+      const vPercent = document.getElementById('viabilityPercent');
+      const vBar = document.getElementById('viabilityBar');
+      const vAdvice = document.getElementById('viabilityAdvice');
+
+      vBox.className = 'viability-box';
+      if (format === 'maos_mesa') {
+        vBox.classList.add('viability-high');
+        vTitle.textContent = '🟢 ALTA VIABILIDADE — MÃOS NA MESA (POV)';
+        vPercent.textContent = '95% de Chance';
+        vBar.style.width = '95%'; vBar.style.background = '#10b981';
+        vAdvice.innerHTML = `Excelente escolha! O <strong>${prod}</strong> funciona perfeitamente em close-up na bancada (girando na mão, mostrando detalhes e textura de perto).`;
+      } else if (format === 'ligado_acao') {
+        vBox.classList.add('viability-high');
+        vTitle.textContent = '🟢 BOA VIABILIDADE — LIGADO EM AÇÃO / CONTROLE';
+        vPercent.textContent = '82% de Chance';
+        vBar.style.width = '82%'; vBar.style.background = '#10b981';
+        vAdvice.innerHTML = `Ótimo formato! Deixe o <strong>${prod}</strong> ligado funcionando no fundo e filme a sua mão clicando no controle remoto ou apontando os benefícios.`;
+      } else if (format === 'ambiente_espaco') {
+        vBox.classList.add('viability-med');
+        vTitle.textContent = '🟡 VIABILIDADE MÉDIA — AMBIENTE / ESPAÇO';
+        vPercent.textContent = '56% de Chance';
+        vBar.style.width = '56%'; vBar.style.background = '#f59e0b';
+        vAdvice.innerHTML = `Intercale cenas do <strong>${prod}</strong> no ambiente com <strong>takes bem de perto das mãos dobrando e testando o material</strong> na bancada.`;
+      } else {
+        vBox.classList.add('viability-low');
+        vTitle.textContent = '🔴 BAIXA VIABILIDADE — VESTIR NO CORPO';
+        vPercent.textContent = '25% de Chance';
+        vBar.style.width = '25%'; vBar.style.background = '#ef4444';
+        vAdvice.innerHTML = `Peças de roupa têm baixa venda sem prova no corpo. Recomendação: use a <em>Central de Vídeos Virais</em> para postar vídeos curtos desse produto.`;
+      }
+
+      const foundBanned = BANNED_TERMS.filter(w => (prod + ' ' + benefit).toLowerCase().includes(w));
+      const warnBox = document.getElementById('bannedWarning');
+      if (foundBanned.length > 0) { warnBox.style.display = 'block'; warnBox.textContent = `🚨 ATENÇÃO ANTIBAN: Remova os termos proibidos (${foundBanned.join(', ')})!`; }
+      else { warnBox.style.display = 'none'; }
+
+      document.getElementById('antiLoopSummary').innerHTML = `✅ <strong>Mapa Anti-Banimento (${mins} min):</strong> Gere <strong>${numTakes} cenas diferentes no Flow</strong> (8s cada) e junte todas antes de colocar em loop.`;
+
+      const fallbackBlueprints = [
+        { titulo_pt: `Apresentação POV nas Mãos: Mãos segurando ${prod}, girando suavemente sem mostrar o rosto.`, acao_en: `First-person POV hands holding ${prod} gently rotating it to show full design, faceless demonstration` },
+        { titulo_pt: `Close-up de Detalhes: Câmera aproximando bem perto de ${prod} enquanto os dedos tocam a superfície.`, acao_en: `Macro close-up of fingers gently touching and inspecting the details of ${prod}` },
+        { titulo_pt: `Demonstração Prática: Mãos mostrando ${prod} em uso real (${benefit}).`, acao_en: `Hands-only POV demonstrating ${prod} in practical everyday use on a clean table` },
+        { titulo_pt: `Visão Superior (Flatlay): Visão de cima para baixo mostrando ${prod} e mãos apontando diferenciais.`, acao_en: `Top-down overhead shot of ${prod} neatly arranged, hands pointing out quality features` },
+        { titulo_pt: `Prova de Qualidade: Mãos testando o acabamento e praticidade de ${prod}.`, acao_en: `Close-up hands testing finish and build quality of ${prod} with natural motion` },
+        { titulo_pt: `Chamada para a Sacolinha: Mãos segurando ${prod} apontando para o carrinho laranja embaixo.`, acao_en: `POV hands holding ${prod} with subtle finger gesture pointing down toward shopping bag area` }
+      ];
+
+      const cenasLista = (aiData && Array.isArray(aiData.cenas) && aiData.cenas.length > 0) ? aiData.cenas : fallbackBlueprints;
+
+      const takesContainer = document.getElementById('takesList');
+      const jsonContainer = document.getElementById('jsonPromptsList');
+      takesContainer.innerHTML = ''; jsonContainer.innerHTML = ''; generatedJsonStrings = [];
+
+      for (let i = 0; i < numTakes; i++) {
+        const bp = cenasLista[i % cenasLista.length];
+        const div = document.createElement('div');
+        div.className = 'take-item';
+        div.innerHTML = `<strong>Cena ${i + 1}:</strong> ${bp.titulo_pt}`;
+        takesContainer.appendChild(div);
+
+        const jsonObj = {
+          scene_number: i + 1,
+          aspect_ratio: "9:16",
+          duration_seconds: 8,
+          fidelidade_a_imagem_enviada: "OBRIGATÓRIO gerar a cena a partir da foto do produto anexada no Google Flow, preservando exatamente o mesmo design, cores e proporção real.",
+          style: "photorealistic, authentic UGC live shopping video, faceless POV hands only, no text overlays",
+          subject: prod,
+          action: bp.acao_en,
+          lighting_and_environment: "soft natural indoor daylight, clean cozy home background, consistent lighting across all scenes",
+          camera: i % 2 === 0 ? "smooth slow handheld push-in, 4k" : "gentle orbital pan around subject, 4k"
+        };
+        const jsonStr = JSON.stringify(jsonObj, null, 2);
+        generatedJsonStrings.push(jsonStr);
+
+        const jCard = document.createElement('div');
+        jCard.className = 'json-card';
+        jCard.innerHTML = `<div class="json-header"><span>🎬 PROMPT JSON — CENA ${i + 1}</span><button type="button" class="btn-neon-outline" onclick="copySingleJson(${i})">📋 Copiar JSON</button></div><pre>${jsonStr}</pre>`;
+        jsonContainer.appendChild(jCard);
+      }
+
+      document.getElementById('scriptAudio1').textContent = (aiData && aiData.audio1) ? aiData.audio1 :
+`[BLOCO 1 - BOAS-VINDAS CALOROSAS] (Pausa de 2s)
+"Oi gente, sejam todos muito bem-vindos! Quem já chegou vai tocando na tela para curtir e me conta nos comentários de qual cidade vocês estão assistindo agora."
+
+[BLOCO 2 - AVISO PARA QUEM CHEGOU AGORA] (Pausa de 2s)
+"Para quem acabou de entrar na live, espera só um pouquinho que eu já vou mostrar todos os detalhes do ${prod} novamente bem de perto, combinado?"
+
+[BLOCO 3 - PAUSA PARA BEBER ÁGUA & MOVIMENTO NO CARRINHO] (Pausa de 3s)
+"Deixa eu só dar uma paradinha rápida para beber um golinho de água... [Pausa de 3 segundos] ...prontinho! Tô vendo aqui que já tem bastante gente colocando o ${prod} no carrinho, não deixa acabar!"`;
+
+      document.getElementById('scriptAudio2').textContent = (aiData && aiData.audio2) ? aiData.audio2 :
+`[BLOCO 1 - ADJETIVOS E QUALIDADE REAL] (Pausa de 2s)
+"Olha só a qualidade desse ${prod}, pessoal... super bem acabado, resistente e tem ${benefit}. Quem recebe em casa sempre elogia porque é exatamente igual ao que vocês estão vendo aqui na tela."
+
+[BLOCO 2 - CUPOM NA SACOLINHA LARANJA] (Pausa de 2s)
+"Clica na sacolinha laranja aqui embaixo, resgata o cupom da plataforma e aproveita o desconto enquanto a live está no ar!"`;
+
+      document.getElementById('scriptAudio3').textContent = (aiData && aiData.audio3) ? aiData.audio3 :
+`[AGRADECIMENTO 1] "Eba! Muito obrigada pela sua compra! Tenho certeza que você vai amar quando o seu ${prod} chegar aí na sua casa!"
+[AGRADECIMENTO 2] "Olha só, acabou de sair mais uma compra aqui na sacolinha! Muito obrigada pela confiança, gente!"
+[AGRADECIMENTO 3] "Parabéns para todo mundo que garantiu o ${prod} hoje com desconto! Quem chegou agora ainda dá tempo de aproveitar no carrinho!"`;
+
+      document.getElementById('chatOutput').textContent = (aiData && Array.isArray(aiData.chat_frases) && aiData.chat_frases.length > 0)
+        ? aiData.chat_frases.join('\n')
+        : `Sejam muito bem-vindos à live! De qual cidade vocês estão assistindo?\nQuem chegou agora espera só um pouquinho que já vou mostrar de novo!\nOlha os detalhes reais do ${prod} bem de perto aqui na tela\nTem muita gente colocando no carrinho hoje, não deixa acabar!\nClica na sacolinha laranja embaixo e resgata o seu cupom\nAcabamento impecável e ${benefit}\nQualquer dúvida sobre o ${prod} manda aqui no chat!\nAproveite o frete promocional clicando no carrinho oficial da live\nJá toca na tela para curtir e ajudar nossa transmissão\nGaranta o seu ${prod} na sacolinha laranja antes de encerrar!`;
+
+      document.getElementById('resultArea').style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '✨ Avaliar Viabilidade & Gerar Estrutura com IA';
+    });
+
+    function copySingleJson(index) { navigator.clipboard.writeText(generatedJsonStrings[index]); alert(`JSON da Cena ${index + 1} copiado!`); }
+    function copyAllJson() { navigator.clipboard.writeText(generatedJsonStrings.join('\n\n---\n\n')); alert('Todos os JSONs copiados!'); }
+    function copyText(id) { navigator.clipboard.writeText(document.getElementById(id).textContent); alert('Copiado com sucesso!'); }
+  </script>
+</body>
+</html>
